@@ -2,6 +2,8 @@ package com.wch.uwb.controller;
 
 import com.wch.uwb.entity.UserEntity;
 import com.wch.uwb.mapper.UserMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
@@ -16,8 +18,7 @@ import java.util.Map;
 @Controller
 @EnableAutoConfiguration
 public class LoginRegisterController {
-    @Autowired
-    private UserMapper userMapper;
+
     @RequestMapping(value="/", method=RequestMethod.GET)
     private String index(Model model){
         model.addAttribute("userEntity", new UserEntity());
@@ -57,7 +58,7 @@ public class LoginRegisterController {
             flag = 0;
             return "register";
         }
-        System.out.println(userEntity.toString());
+        logger.info(userEntity.toString());
         Date now=new java.sql.Date(System.currentTimeMillis());
         userEntity.setRegisterTime(now);
         userEntity.setAuthor(6);
@@ -71,7 +72,7 @@ public class LoginRegisterController {
     @ResponseBody
     private Map login(@RequestBody UserEntity userEntity, Model model, HttpServletRequest request) {
         UserEntity uE = userMapper.getOneByLogin(userEntity.getLogin());
-        System.out.println(userEntity.getLogin()+","+userEntity.getPasswd());
+        logger.info(userEntity.getLogin()+","+userEntity.getPasswd());
 
         Map<String, Object> result = new LinkedHashMap<>();
        if(uE != null && uE.getPasswd().equals(userEntity.getPasswd()) ){
@@ -83,4 +84,7 @@ public class LoginRegisterController {
        return result;
     }
 
+    private  final Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    private UserMapper userMapper;
 }

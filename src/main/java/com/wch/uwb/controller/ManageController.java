@@ -7,6 +7,8 @@ import com.wch.uwb.entity.WeiboFNT;
 import com.wch.uwb.mapper.ReportMapper;
 import com.wch.uwb.mapper.UserMapper;
 import com.wch.uwb.mapper.WeiboMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
@@ -20,6 +22,7 @@ import java.util.*;
 @Controller
 @EnableAutoConfiguration
 public class ManageController {
+
     //编辑用户信息-获取
     @RequestMapping(value="/userManage", method= RequestMethod.GET)
     public String userManagePOST(Model model, HttpServletRequest request) {
@@ -69,7 +72,7 @@ public class ManageController {
         if(ue.getAuthor() != 0)userEntity.setAuthor(ue.getAuthor());
         userEntity.setSex(ue.getSex());
         userMapper.update(userEntity);
-        System.out.println(ue.toString());
+        logger.info(ue.toString());
         return "redirect:/userManage";
     }
     //free
@@ -174,7 +177,7 @@ public class ManageController {
     @ResponseBody
     private Map manageLogin(@RequestBody UserEntity userEntity, Model model, HttpServletRequest request) {
         UserEntity uE = userMapper.getOneByLogin(userEntity.getLogin());
-        System.out.println(userEntity.getLogin()+","+userEntity.getPasswd());
+        logger.info(userEntity.getLogin()+","+userEntity.getPasswd());
 
         Map<String, Object> result = new LinkedHashMap<>();
         if(uE != null && uE.getPasswd().equals(userEntity.getPasswd()) && uE.getAuthor() < 3){
@@ -199,6 +202,7 @@ public class ManageController {
         return newDate;
     }
 
+    private  final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private UserMapper userMapper;
     @Autowired

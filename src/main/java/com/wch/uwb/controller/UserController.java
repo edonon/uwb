@@ -2,6 +2,8 @@ package com.wch.uwb.controller;
 
 import com.wch.uwb.entity.*;
 import com.wch.uwb.mapper.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
@@ -44,15 +46,15 @@ public class UserController {
                 len = weiboMapper.getMyWeiboListCNT(id);
             }
         }
-        System.out.println("页面参数"+id+ WEIBO_PAGE*(page - 1)+ len+weiboMapper.getMyWeiboListCNT(id));
+        logger.info("页面参数"+id+ WEIBO_PAGE*(page - 1)+ len+weiboMapper.getMyWeiboListCNT(id));
         List<WeiboEntity>  WBList = weiboMapper.getMyListInInterval(id, WEIBO_PAGE*(page - 1), len);
         model.addAttribute("WBList", WBList);
-        System.out.println("WBList:"+WBList.size());
+        logger.info("WBList:"+WBList.size());
         int pageCnt = (int)weiboMapper.getMyWeiboListCNT(id)/WEIBO_PAGE;
         if(pageCnt*WEIBO_PAGE != weiboMapper.getMyWeiboListCNT(id)){
             pageCnt++;
         }
-        System.out.println("pageCnt:"+pageCnt);
+        logger.info("pageCnt:"+pageCnt);
         model.addAttribute("pageCnt", pageCnt);
         model.addAttribute("page", page);
         return "personalSpace";
@@ -67,8 +69,8 @@ public class UserController {
         UserEntity userEntity  = userMapper.getOne(id);
         //发言检测
         if(userEntity.getFree() != null && userEntity.getFree().after(now)){
-//            System.out.println(userEntity.getFree().toString());
-//            System.out.println("now"+now.toString());
+//            logger.info(userEntity.getFree().toString());
+//            logger.info("now"+now.toString());
             return "freetime";
         }
         WeiboEntity weiboEntity = new WeiboEntity(id, content,now, now, 0, "");
@@ -117,7 +119,7 @@ public class UserController {
         UserEntity friend = userMapper.getOne(id);
         UserEntity my = userMapper.getOne(id);
         for(int i=0; i<chatL.size();i++){
-            System.out.println(chatL.get(i).toString());
+            logger.info(chatL.get(i).toString());
         }
         model.addAttribute("chatL", chatL);
         model.addAttribute("friend", friend);
@@ -150,7 +152,7 @@ public class UserController {
         UserEntity friend = userMapper.getOne(id);
         UserEntity my = userMapper.getOne(id);
         for(int i=0; i<chatL.size();i++){
-            System.out.println(chatL.get(i).toString());
+            logger.info(chatL.get(i).toString());
         }
         model.addAttribute("chatL", chatL);
         model.addAttribute("friend", friend);
@@ -191,7 +193,7 @@ public class UserController {
         if(userEntity.getPhoto() != null) ue.setPhoto(userEntity.getPhoto());
         ue.setUserName(userEntity.getUserName());
         ue.setResume(userEntity.getResume());
-        System.out.println(ue.toString());
+        logger.info(ue.toString());
         userMapper.update(ue);
 
         return "redirect:uploadStatus";
@@ -208,7 +210,7 @@ public class UserController {
 
             userEntities.add( userMapper.getOne( followList.get(i).getuId() ) );
             //能放入对象
-            System.out.println(userEntities.get(i).toString());
+            logger.info(userEntities.get(i).toString());
         }
 
         model.addAttribute("userEntities", userEntities);
@@ -225,7 +227,7 @@ public class UserController {
 
             userEntities.add( userMapper.getOne( fanEntityList.get(i).getFanId() ) );
             //能放入对象
-            System.out.println(userEntities.get(i).toString());
+            logger.info(userEntities.get(i).toString());
         }
         model.addAttribute("userEntities", userEntities);
         return "follow";
@@ -254,7 +256,7 @@ public class UserController {
             }
         }
         UserEntity ue = userMapper.getOne(uid);
-        System.out.println("state="+state);
+        logger.info("state="+state);
         model.addAttribute("state", state);
         model.addAttribute("ue", ue);
         return "information";
@@ -283,13 +285,15 @@ public class UserController {
         int id = (int)request.getSession().getAttribute("id");
         Date now=new java.sql.Date(System.currentTimeMillis());
         CommentEntity commentEntity = new CommentEntity(wid, id, comment, now);
-        System.out.println(commentEntity.toString());
+        logger.info(commentEntity.toString());
         commentMapper.insert(commentEntity);
 
         return "redirect:/main?page=1";
     }
     private int min(int i, int j){if(i<j)return i; return j;}
     private int max(int i, int j){if(i>j)return i; return j;}
+
+    private  final Logger logger = LoggerFactory.getLogger(this.getClass());
     //private static String IMG_FOLDER = "E:\\java_code\\uwb\\src\\main\\resources\\static\\WBresources\\img\\";
     //private static String PHOTO_FOLDER = "E:\\java_code\\uwb\\src\\main\\resources\\static\\WBresources\\photo\\";
     private static String IMG_FOLDER = "E:\\java_code\\uwb\\target\\classes\\static\\WBresources\\img\\";

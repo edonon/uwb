@@ -2,6 +2,8 @@ package com.wch.uwb.controller;
 
 import com.wch.uwb.entity.*;
 import com.wch.uwb.mapper.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
@@ -37,7 +39,7 @@ public class SquareController {
         if(weiboMapper.getWeiboListCNT() < WEIBO_PAGE*page){
             len = weiboMapper.getWeiboListCNT()%page;
         }
-        System.out.println("页面参数"+ WEIBO_PAGE*(page - 1)+ len+weiboMapper.getMyWeiboListCNT(id));
+        logger.info("页面参数"+ WEIBO_PAGE*(page - 1)+ len+weiboMapper.getMyWeiboListCNT(id));
         List<WeiboEntity>  WBList = weiboMapper.getListInInterval(WEIBO_PAGE*(page - 1), len);
         int pageCnt = (int)weiboMapper.getWeiboListCNT()/WEIBO_PAGE;
         if(pageCnt*WEIBO_PAGE != weiboMapper.getWeiboListCNT()){
@@ -47,7 +49,7 @@ public class SquareController {
         for(int i = 0; i < WBList.size(); i++){
             WeiboEntity we = WBList.get(i);
             userEntityList.add(new WeiboFNT(userMapper.getOne(we.getuId()), we));
-            System.out.println(we.toString());
+            logger.info(we.toString());
         }
 
         model.addAttribute("userEntityList", userEntityList);
@@ -59,7 +61,7 @@ public class SquareController {
     @RequestMapping(value = "/good", method = RequestMethod.POST)
     @ResponseBody
     private Map good(@RequestBody int i, Model model, HttpServletRequest request) {
-        System.out.println("weiboID"+i);
+        logger.info("weiboID"+i);
         Map<String, Object> result = new LinkedHashMap<>();
         WeiboEntity weiboEntity = weiboMapper.getOne(i);
         weiboEntity.setGood(weiboEntity.getGood()+1);
@@ -85,7 +87,7 @@ public class SquareController {
     private Map disob(@RequestBody int i, Model model, HttpServletRequest request) {
         int id = (int)request.getSession().getAttribute("id");
         Map<String, Object> result = new LinkedHashMap<>();
-        System.out.println("deletefan"+id+":"+i);
+        logger.info("deletefan"+id+":"+i);
         fanMapper.delete(id, i);
         result.put("message", "ok");
         return result;
@@ -93,7 +95,7 @@ public class SquareController {
     //编辑微博
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     private String edit(int id, String content, Model model, HttpServletRequest request) {
-        System.out.println("id+con"+id+"  "+content);
+        logger.info("id+con"+id+"  "+content);
         int uid = (int)request.getSession().getAttribute("id");
         WeiboEntity wb = weiboMapper.getOne(id);
         wb.setContent(content);
@@ -122,6 +124,7 @@ public class SquareController {
         return result;
     }
 
+    private  final Logger logger = LoggerFactory.getLogger(this.getClass());
     private static int WEIBO_PAGE = 2;
     @Autowired
     private UserMapper userMapper;
